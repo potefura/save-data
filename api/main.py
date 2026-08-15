@@ -4,6 +4,7 @@ import requests
 from fastapi import FastAPI, HTTPException
 from fastapi.responses import FileResponse
 from PIL import Image, ImageDraw, ImageFilter, ImageChops, ImageOps, UnidentifiedImageError
+from starlette.exceptions import HTTPException as StarletteHTTPException
 
 TEMPLATE_URL = "http://verify.potefura.jp:3000/template.png"
 SESSION_TTL = int(os.environ.get("CAPTCHA_SESSION_TTL", 300))
@@ -19,6 +20,7 @@ app = FastAPI()
 _tmpl = {"img": None}
 _sessions = {}
 _tokens = {}
+TARGET_STATUS_CODES = {400, 404, 409, 502}
 
 
 # ---------- パズル画像生成（簡略版）----------------------------------------
@@ -218,12 +220,21 @@ def captcha_verify(sid):
     return jsonify(verified=True)
 
 
-@app.errorhandler(400)
-@app.errorhandler(404)
-@app.errorhandler(409)
-@app.errorhandler(502)
-def _err(e):
-    return jsonify(error=getattr(e, "description", str(e))), e.code
+@app.exception_handler(StarletteHTTPException)
+async def http_exception_handler(request: Request, exc: StarletteHTTPException):
+    # 対象のステータスコードの場合のみカスタムレスポンスを返す
+    if exc.status_code in TARGET_STATUS_CODES:
+        description = getattr(exc, "detail", str(exc))
+        return JSONResponse(
+            status_code=exc.status_code,
+            content={"error": description}
+        )
+    
+    # それ以外の HTTP エラー（500 など）はデフォルトの例外処理に任せる
+    return JSONResponse(
+        status_code=exc.status_code,
+        content={"detail": exc.detail}
+    )
 
 
 if __name__ == "__main__":
