@@ -1,8 +1,9 @@
 import io, math, os, secrets, time
 import numpy as np
 import requests
-from fastapi import FastAPI, HTTPException
-from fastapi.responses import FileResponse
+from fastapi import FastAPI, HTTPException, Request
+from fastapi.responses import JSONResponse, FileResponse
+from starlette.exceptions import HTTPException as StarletteHTTPException
 from PIL import Image, ImageDraw, ImageFilter, ImageChops, ImageOps, UnidentifiedImageError
 from starlette.exceptions import HTTPException as StarletteHTTPException
 
