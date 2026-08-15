@@ -5,7 +5,6 @@ from fastapi import FastAPI, HTTPException, Request
 from fastapi.responses import JSONResponse, FileResponse
 from starlette.exceptions import HTTPException as StarletteHTTPException
 from PIL import Image, ImageDraw, ImageFilter, ImageChops, ImageOps, UnidentifiedImageError
-from starlette.exceptions import HTTPException as StarletteHTTPException
 
 TEMPLATE_URL = "http://verify.potefura.jp:3000/template.png"
 SESSION_TTL = int(os.environ.get("CAPTCHA_SESSION_TTL", 300))
