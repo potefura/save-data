@@ -1,9 +1,8 @@
 import io, math, os, secrets, time
 import numpy as np
 import requests
-from fastapi import FastAPI, HTTPException, Request
-from fastapi.responses import JSONResponse, FileResponse
-from starlette.exceptions import HTTPException as StarletteHTTPException
+from flask import Flask, jsonify, request, send_file, abort
+from flask_cors import CORS
 from PIL import Image, ImageDraw, ImageFilter, ImageChops, ImageOps, UnidentifiedImageError
 
 TEMPLATE_URL = "http://verify.potefura.jp:3000/template.png"
@@ -15,12 +14,12 @@ SIZE, R, KNOB = 52, 10, 11
 PAD = KNOB + 3
 TOL = 6                  # 正解判定の許容誤差(px)
 
-app = FastAPI()
+app = Flask(__name__)
+CORS(app, resources={r"/*": {"origins": "*"}}, allow_headers="*", methods="*")
 
 _tmpl = {"img": None}
 _sessions = {}
 _tokens = {}
-TARGET_STATUS_CODES = {400, 404, 409, 502}
 
 
 # ---------- パズル画像生成（簡略版）----------------------------------------
@@ -220,5 +219,9 @@ def captcha_verify(sid):
     return jsonify(verified=True)
 
 
-if __name__ == "__main__":
-    app.run(host="0.0.0.0", port=80, debug=True)
+@app.errorhandler(400)
+@app.errorhandler(404)
+@app.errorhandler(409)
+@app.errorhandler(502)
+def _err(e):
+    return jsonify(error=getattr(e, "description", str(e))), e.code
