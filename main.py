@@ -1,8 +1,8 @@
 import io, math, os, secrets, time
 import numpy as np
 import requests
-from flask import Flask, jsonify, request, send_file, abort
-from flask_cors import CORS
+from fastapi import FastAPI, HTTPException
+from fastapi.responses import FileResponse
 from PIL import Image, ImageDraw, ImageFilter, ImageChops, ImageOps, UnidentifiedImageError
 
 TEMPLATE_URL = "http://verify.potefura.jp:3000/template.png"
@@ -14,8 +14,7 @@ SIZE, R, KNOB = 52, 10, 11
 PAD = KNOB + 3
 TOL = 6                  # 正解判定の許容誤差(px)
 
-app = Flask(__name__)
-CORS(app, resources={r"/*": {"origins": "*"}}, allow_headers="*", methods="*")
+app = FastAPI(__name__)
 
 _tmpl = {"img": None}
 _sessions = {}
