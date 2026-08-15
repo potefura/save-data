@@ -220,22 +220,5 @@ def captcha_verify(sid):
     return jsonify(verified=True)
 
 
-@app.exception_handler(StarletteHTTPException)
-async def http_exception_handler(request: Request, exc: StarletteHTTPException):
-    # 対象のステータスコードの場合のみカスタムレスポンスを返す
-    if exc.status_code in TARGET_STATUS_CODES:
-        description = getattr(exc, "detail", str(exc))
-        return JSONResponse(
-            status_code=exc.status_code,
-            content={"error": description}
-        )
-    
-    # それ以外の HTTP エラー（500 など）はデフォルトの例外処理に任せる
-    return JSONResponse(
-        status_code=exc.status_code,
-        content={"detail": exc.detail}
-    )
-
-
 if __name__ == "__main__":
     app.run(host="0.0.0.0", port=80, debug=True)
