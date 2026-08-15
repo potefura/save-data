@@ -14,7 +14,7 @@ SIZE, R, KNOB = 52, 10, 11
 PAD = KNOB + 3
 TOL = 6                  # 正解判定の許容誤差(px)
 
-app = FastAPI(__name__)
+app = FastAPI()
 
 _tmpl = {"img": None}
 _sessions = {}
